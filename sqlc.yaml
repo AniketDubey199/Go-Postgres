@@ -1,0 +1,19 @@
+version : "2"
+sql:
+  - engine: "postgresql" # what engine i am using like what db i want to automate 
+    schema: "db/migrations" # in which folder is the schema for tables.
+    queries: "db/queries" # in which folder are the queries
+    gen:
+      go: # using go language .
+        package: "db" 
+        out: "db/sqlc" # what folder the functions will get created.
+        sql_package: "pgx/v5" 
+        overrides:
+          - db_type: varchar # searches for the exact datatype in Postgres and say if this is null use go's *string structure,
+            nullable: true
+            go_type:
+              type: "*string"
+          - db_type: text # same for this too 
+            nullable: true
+            go_type:
+              type: "*string"
