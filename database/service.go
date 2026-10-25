@@ -42,19 +42,19 @@ func Migrate() {
 }
 
 // Add this to your database/migrate.go file
-func RollbackOne() {
-	key := os.Getenv("DATABASE_URL")
-	m, err := migrate.New("file://db/migrations", key)
-	if err != nil {
-		log.Fatalf("Failed to initialize migrator: %v", err)
-	}
+// func RollbackOne() {
+// 	key := os.Getenv("DATABASE_URL")
+// 	m, err := migrate.New("file://db/migrations", key)
+// 	if err != nil {
+// 		log.Fatalf("Failed to initialize migrator: %v", err)
+// 	}
 
-	// Steps down by exactly 1 version
-	if err := m.Steps(-1); err != nil {
-		log.Fatalf("Rollback failed: %v", err)
-	}
-	log.Println("Successfully rolled back 1 database version.")
-}
+// 	// Steps down by exactly 1 version
+// 	if err := m.Steps(-1); err != nil {
+// 		log.Fatalf("Rollback failed: %v", err)
+// 	}
+// 	log.Println("Successfully rolled back 1 database version.")
+// }
 
 func Create(ctx context.Context, pool *pgxpool.Pool) {
 	queries := db.New(pool)

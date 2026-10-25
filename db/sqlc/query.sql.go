@@ -10,7 +10,7 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (name, email) VALUES ($1, $2) RETURNING user_id, name, email
+INSERT INTO users (name, email) VALUES ($1, $2) RETURNING user_id, name, email, new_id
 `
 
 type CreateUserParams struct {
@@ -21,18 +21,28 @@ type CreateUserParams struct {
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email)
 	var i User
-	err := row.Scan(&i.UserID, &i.Name, &i.Email)
+	err := row.Scan(
+		&i.UserID,
+		&i.Name,
+		&i.Email,
+		&i.NewID,
+	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT user_id, name, email FROM users
+SELECT user_id, name, email, new_id FROM users
 WHERE user_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, userID int32) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByID, userID)
 	var i User
-	err := row.Scan(&i.UserID, &i.Name, &i.Email)
+	err := row.Scan(
+		&i.UserID,
+		&i.Name,
+		&i.Email,
+		&i.NewID,
+	)
 	return i, err
 }

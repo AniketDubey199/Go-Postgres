@@ -4,8 +4,35 @@
 
 package db
 
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type Order struct {
+	OrderID   int32
+	UserID    int32
+	OrderDate pgtype.Timestamp
+	Status    string
+}
+
+type OrderItem struct {
+	OrderItemID int32
+	OrderID     int32
+	ProductID   int32
+	Quantity    int32
+	UnitPrice   int32
+}
+
+type Product struct {
+	ProductID   int32
+	ProductName string
+	UnitPrice   int32
+	StockQty    int32
+}
+
 type User struct {
 	UserID int32
 	Name   string
 	Email  string
+	NewID  pgtype.UUID
 }
