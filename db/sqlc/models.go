@@ -10,9 +10,9 @@ import (
 
 type Order struct {
 	OrderID   int32
-	UserID    int32
 	OrderDate pgtype.Timestamp
 	Status    string
+	UserID    pgtype.UUID
 }
 
 type OrderItem struct {
@@ -34,5 +34,5 @@ type User struct {
 	UserID int32
 	Name   string
 	Email  string
-	NewID  pgtype.UUID
+	ID     pgtype.UUID
 }

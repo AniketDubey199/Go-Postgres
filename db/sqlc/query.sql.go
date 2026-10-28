@@ -10,7 +10,7 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (name, email) VALUES ($1, $2) RETURNING user_id, name, email, new_id
+INSERT INTO users (name, email) VALUES ($1, $2) RETURNING user_id, name, email, id
 `
 
 type CreateUserParams struct {
@@ -25,13 +25,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UserID,
 		&i.Name,
 		&i.Email,
-		&i.NewID,
+		&i.ID,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT user_id, name, email, new_id FROM users
+SELECT user_id, name, email, id FROM users
 WHERE user_id = $1 LIMIT 1
 `
 
@@ -42,7 +42,7 @@ func (q *Queries) GetUserByID(ctx context.Context, userID int32) (User, error) {
 		&i.UserID,
 		&i.Name,
 		&i.Email,
-		&i.NewID,
+		&i.ID,
 	)
 	return i, err
 }
