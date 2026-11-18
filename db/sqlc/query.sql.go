@@ -7,10 +7,34 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createProduct = `-- name: CreateProduct :one
+INSERT INTO products (product_name , unit_price , stock_qty) VALUES ($1 , $2 , $3) RETURNING product_name, unit_price, stock_qty, product_id
+`
+
+type CreateProductParams struct {
+	ProductName string
+	UnitPrice   int32
+	StockQty    int32
+}
+
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
+	row := q.db.QueryRow(ctx, createProduct, arg.ProductName, arg.UnitPrice, arg.StockQty)
+	var i Product
+	err := row.Scan(
+		&i.ProductName,
+		&i.UnitPrice,
+		&i.StockQty,
+		&i.ProductID,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (name, email) VALUES ($1, $2) RETURNING user_id, name, email, id
+INSERT INTO users (name, email) VALUES ($1, $2) RETURNING name, email, user_id
 `
 
 type CreateUserParams struct {
@@ -21,28 +45,73 @@ type CreateUserParams struct {
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser, arg.Name, arg.Email)
 	var i User
-	err := row.Scan(
-		&i.UserID,
-		&i.Name,
-		&i.Email,
-		&i.ID,
-	)
+	err := row.Scan(&i.Name, &i.Email, &i.UserID)
 	return i, err
 }
 
+const deleteUserById = `-- name: DeleteUserById :one
+DELETE FROM users 
+where user_id = $1 RETURNING user_id
+`
+
+func (q *Queries) DeleteUserById(ctx context.Context, userID pgtype.UUID) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, deleteUserById, userID)
+	var user_id pgtype.UUID
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
+const getUser = `-- name: GetUser :many
+SELECT name, email, user_id FROM users
+`
+
+func (q *Queries) GetUser(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUser)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(&i.Name, &i.Email, &i.UserID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByID = `-- name: GetUserByID :one
-SELECT user_id, name, email, id FROM users
+SELECT name, email, user_id FROM users
 WHERE user_id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, userID int32) (User, error) {
+func (q *Queries) GetUserByID(ctx context.Context, userID pgtype.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByID, userID)
 	var i User
-	err := row.Scan(
-		&i.UserID,
-		&i.Name,
-		&i.Email,
-		&i.ID,
-	)
+	err := row.Scan(&i.Name, &i.Email, &i.UserID)
+	return i, err
+}
+
+const updateUserByID = `-- name: UpdateUserByID :one
+UPDATE users set
+email = $1 
+where user_id = $2 
+RETURNING name, email, user_id
+`
+
+type UpdateUserByIDParams struct {
+	Email  string
+	UserID pgtype.UUID
+}
+
+func (q *Queries) UpdateUserByID(ctx context.Context, arg UpdateUserByIDParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserByID, arg.Email, arg.UserID)
+	var i User
+	err := row.Scan(&i.Name, &i.Email, &i.UserID)
 	return i, err
 }

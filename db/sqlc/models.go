@@ -18,21 +18,20 @@ type Order struct {
 type OrderItem struct {
 	OrderItemID int32
 	OrderID     int32
-	ProductID   int32
 	Quantity    int32
 	UnitPrice   int32
+	ProductID   pgtype.UUID
 }
 
 type Product struct {
-	ProductID   int32
 	ProductName string
 	UnitPrice   int32
 	StockQty    int32
+	ProductID   pgtype.UUID
 }
 
 type User struct {
-	UserID int32
 	Name   string
 	Email  string
-	ID     pgtype.UUID
+	UserID pgtype.UUID
 }

@@ -5,15 +5,19 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/AniketDubey199/PostgreSQL/database"
+	"github.com/AniketDubey199/PostgreSQL/middleware"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
 
 func main() {
+	mux := http.NewServeMux()
+	handler := middleware.LoggingDetails(mux)
 	// rollback := flag.Bool("rollback", false, "Rollback data by step 1")  // this is for the rollback using the flag tool , we will use the make file version too
 	flag.Parse()
 	if err := godotenv.Load(); err != nil {
@@ -42,12 +46,12 @@ func main() {
 		log.Fatalf("Unable to create connection pool %v", err)
 	}
 
-	database.Create(ctx, pool)
-
 	defer pool.Close()
 
 	if err := pool.Ping(ctx); err != nil {
 		log.Fatalf("Unable to create connection pool %v", err)
 	}
 	fmt.Println("Database connection pool intialized successfully ")
+	middleware.Handlercalling(mux, pool)
+	http.ListenAndServe(":8080", handler)
 }
